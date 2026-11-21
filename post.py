@@ -83,6 +83,20 @@ def setup_firebase(raw):
     print('готово! обнови страницу сайта — под постами появятся формы комментариев')
 
 
+def setup_chat(bot):
+    """запоминает юзернейм телеграм-бота для входа в чат"""
+    bot = bot.strip().lstrip('@')
+    if not bot.endswith('bot') and not bot.endswith('Bot'):
+        print(f'юзернейм бота обычно кончается на «bot», а это «{bot}» — но сохраняю как есть')
+    js = ('// телеграм-бот для входа в чат (публичный юзернейм, не секрет)\n'
+          '// adminId — id телеграма владельца (для плашки «админ»), можно оставить null\n'
+          f'window.CHAT_CONFIG = {{ bot: "{bot}", adminId: null }};\n')
+    (BASE / 'chat-config.js').write_text(js, encoding='utf-8')
+    print(f'chat-config.js записан (бот @{bot})')
+    git_push('chat: вход через телеграм включён')
+    print('готово! на сайте появится кнопка чата (обнови страницу)')
+
+
 def setup_repo(url):
     url = url.strip().rstrip('/')
     if url.startswith('https://github.com/'):
@@ -212,9 +226,14 @@ def main():
     ap.add_argument('--by', help='имя автора комментария (с --comment)')
     ap.add_argument('--setup', metavar='REPO', help='подключить github-репозиторий (один раз)')
     ap.add_argument('--firebase', metavar='CONFIG', help='вставить конфиг firebase (глобальные лайки/комменты)')
+    ap.add_argument('--chat', metavar='BOT', help='юзернейм телеграм-бота для входа в чат (@...bot)')
     args = ap.parse_args()
 
     d = load()
+
+    # чат через телеграм-виджет
+    if args.chat:
+        return setup_chat(args.chat)
 
     # глобальные лайки/комментарии через firebase
     if args.firebase:

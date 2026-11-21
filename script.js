@@ -546,4 +546,135 @@
   });
   lb.addEventListener('click', closeLb);
   addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLb(); });
+
+  /* ============================================================
+     9 · ГЛОБАЛЬНЫЙ ЧАТ · вход через Telegram (Login Widget)
+     требует chat-config.js (post.py --chat бот_юзернейм)
+     ============================================================ */
+  const chat = $('#chat');
+  const chatFab = $('#chatFab');
+  const chatBadge = $('#chatBadge');
+  const chatLog = $('#chatLog');
+  const chatCount = $('#chatCount');
+  const chatForm = $('#chatForm');
+  const chatLogin = $('#chatLogin');
+  const chatMe = $('#chatMe');
+
+  let chatUser = null;
+  try { chatUser = JSON.parse(localStorage.getItem('tguser') || 'null'); } catch {}
+  const isAdmin = (m) => (m.username || '').toLowerCase() === 'aayogima'
+    || (window.CHAT_CONFIG && window.CHAT_CONFIG.adminId && m.uid === window.CHAT_CONFIG.adminId);
+
+  const chatSeen = () => { try { return +localStorage.getItem('chatSeen') || 0; } catch { return 0; } };
+
+  // логин: телеграм-виджет вызывает глобальную onTelegramAuth
+  window.onTelegramAuth = (user) => {
+    chatUser = { uid: user.id, name: user.first_name || user.username || 'анон', username: user.username || '', photo: user.photo_url || '' };
+    try { localStorage.setItem('tguser', JSON.stringify(chatUser)); } catch {}
+    syncChatLogin();
+    toast(`привет, ${chatUser.name} 👋`);
+  };
+
+  const syncChatLogin = () => {
+    if (chatUser) {
+      chatForm.hidden = false;
+      chatLogin.hidden = true;
+      chatMe.hidden = false;
+      chatMe.innerHTML = `ты: <b>${esc(chatUser.name)}</b> ${chatUser.username ? '@' + esc(chatUser.username) : ''} · <u id="chatOut" style="cursor:pointer">выйти</u>`;
+      $('#chatOut').addEventListener('click', () => {
+        chatUser = null;
+        try { localStorage.removeItem('tguser'); } catch {}
+        syncChatLogin();
+      });
+    } else {
+      chatForm.hidden = true;
+      chatLogin.hidden = false;
+      chatMe.hidden = true;
+    }
+  };
+  syncChatLogin();
+
+  // открытие/закрытие
+  const openChat = () => { chat.hidden = false; chatFab.hidden = true; chatBadge.hidden = true; try { localStorage.setItem('chatSeen', Date.now()); } catch {} if ($('#chatText')) $('#chatText').focus(); };
+  const closeChat = () => { chat.hidden = true; chatFab.hidden = false; };
+  chatFab.addEventListener('click', openChat);
+  $('#chatClose').addEventListener('click', closeChat);
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && !chat.hidden) closeChat(); });
+
+  const fmtTime = (iso) => new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+
+  const renderChat = (docs) => {
+    const seen = chatSeen();
+    let unread = 0;
+    chatLog.innerHTML = '';
+    for (const dc of docs) {
+      const m = dc.data();
+      const t = new Date(m.date).getTime() || 0;
+      if (t > seen) unread++;
+      const own = chatUser && m.uid === chatUser.uid;
+      const div = document.createElement('div');
+      div.className = 'msg' + (own ? ' own' : '');
+      div.innerHTML = `
+        ${m.photo ? `<img class="msg-ava" src="${esc(m.photo)}" alt="" loading="lazy">` : ''}
+        <div class="msg-body">
+          <div class="msg-head">
+            <span class="msg-name">${esc(m.name || 'анон')}</span>
+            ${isAdmin(m) ? '<span class="msg-admin">админ</span>' : ''}
+            <span class="msg-time mono">${fmtTime(m.date)}</span>
+          </div>
+          <div class="msg-text">${linkify(m.text)}</div>
+        </div>`;
+      chatLog.appendChild(div);
+    }
+    const empty = $('.chat-empty');
+    if (empty) empty.remove();
+    chatCount.textContent = docs.length;
+    chatLog.scrollTop = chatLog.scrollHeight;
+    // бейдж непрочитанных (только когда чат закрыт)
+    if (!chatFab.hidden && unread > 0) { chatBadge.textContent = unread > 99 ? '99+' : unread; chatBadge.hidden = false; }
+  };
+
+  const initChat = () => {
+    const bot = window.CHAT_CONFIG && window.CHAT_CONFIG.bot;
+    if (!bot) return;                       // чат ещё не настроен — кнопки нет
+    chatFab.hidden = false;
+
+    // виджет входа
+    const s = document.createElement('script');
+    s.src = 'https://telegram.org/js/telegram-widget.js?22';
+    s.async = true;
+    s.setAttribute('data-telegram-login', bot);
+    s.setAttribute('data-size', 'large');
+    s.setAttribute('data-userpic', 'true');
+    s.setAttribute('data-radius', '16');
+    s.setAttribute('data-onauth', 'onTelegramAuth(user)');
+    s.setAttribute('data-request-access', 'write');
+    $('#tgWidget').appendChild(s);
+
+    // живые сообщения
+    fbReady.then(() => {
+      if (!fb) return;
+      fb.db.collection('chat').orderBy('date').limitToLast(120).onSnapshot(
+        (snap) => renderChat(snap.docs),
+        () => {},
+      );
+    });
+  };
+  loadScript('chat-config.js').then(initChat).catch(() => {});
+
+  // отправка
+  chatForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = $('#chatText');
+    const text = (input.value || '').trim().slice(0, 500);
+    if (!text || !fb || !chatUser) return;
+    const btn = $('.pc-send', chatForm);
+    btn.textContent = '…';
+    fb.db.collection('chat').add({
+      uid: chatUser.uid, name: chatUser.name, username: chatUser.username,
+      photo: chatUser.photo, text, date: new Date().toISOString(),
+    })
+      .then(() => { input.value = ''; input.focus(); btn.textContent = '✓'; setTimeout(() => btn.textContent = 'отправить', 1000); try { localStorage.setItem('chatSeen', Date.now()); } catch {} })
+      .catch(() => { btn.textContent = '×'; setTimeout(() => btn.textContent = 'отправить', 1500); toast('сообщение не ушло — попробуй ещё'); });
+  });
 })();
