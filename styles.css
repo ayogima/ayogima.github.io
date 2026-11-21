@@ -613,6 +613,10 @@ h1, h2, h3 { line-height: 1.12; font-weight: 800; }
   width: 30px; height: 30px; border-radius: 50%; object-fit: cover;
   border: 1px solid var(--hairline); flex-shrink: 0;
 }
+.msg-ava--dot {
+  display: grid; place-items: center; background: var(--surface-c-highest);
+  font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--primary);
+}
 .msg.own .msg-ava { display: none; }
 .msg-body { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 .msg-head { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
@@ -638,11 +642,12 @@ h1, h2, h3 { line-height: 1.12; font-weight: 800; }
 .chat-me b { color: var(--red); font-weight: 500; }
 .chat-form { display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--hairline); }
 .chat-form input {
-  flex: 1; font-family: var(--font-body); font-size: 13.5px; color: var(--text);
+  font-family: var(--font-body); font-size: 13.5px; color: var(--text);
   background: var(--surface-c-hi); border: 1px solid var(--hairline);
   border-radius: 999px; padding: 9px 14px; min-width: 0;
 }
 .chat-form input:focus { outline: none; border-color: rgba(255, 65, 72, .55); }
+#chatText { flex: 1; }
 
 @media (max-width: 480px) {
   .chat { right: 12px; bottom: 82px; }

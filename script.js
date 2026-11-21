@@ -615,7 +615,9 @@
       const div = document.createElement('div');
       div.className = 'msg' + (own ? ' own' : '');
       div.innerHTML = `
-        ${m.photo ? `<img class="msg-ava" src="${esc(m.photo)}" alt="" loading="lazy">` : ''}
+        ${m.photo
+          ? `<img class="msg-ava" src="${esc(m.photo)}" alt="" loading="lazy">`
+          : `<span class="msg-ava msg-ava--dot" aria-hidden="true">${esc((m.name || '?').slice(0, 1).toUpperCase())}</span>`}
         <div class="msg-body">
           <div class="msg-head">
             <span class="msg-name">${esc(m.name || 'анон')}</span>
