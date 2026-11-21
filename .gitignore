@@ -4,3 +4,4 @@ Thumbs.db
 *.swp
 __pycache__/
 .repo.json
+.gtoken.json
