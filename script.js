@@ -86,12 +86,12 @@
      2 · МУЗЫКА fakemink · случайный трек при каждом заходе
      ============================================================ */
   const TRACKS = [
-    { file: 'assets/music/night-blooming-jasmine.mp3', title: 'Night, Blooming Jasmine', dur: 178 },
-    { file: 'assets/music/easter-pink.mp3',            title: 'Easter Pink',            dur: 85  },
-    { file: 'assets/music/ragebait.mp3',               title: 'Ragebait',               dur: 119 },
-    { file: 'assets/music/blow-me.mp3',                title: 'Blow Me',                dur: 131 },
-    { file: 'assets/music/just-kitten.mp3',            title: 'Just Kitten',            dur: 199 },
-    { file: 'assets/music/ym.mp3',                     title: 'Ym',                     dur: 132 },
+    { file: 'night-blooming-jasmine.mp3', title: 'Night, Blooming Jasmine', dur: 178 },
+    { file: 'easter-pink.mp3',            title: 'Easter Pink',            dur: 85  },
+    { file: 'ragebait.mp3',               title: 'Ragebait',               dur: 119 },
+    { file: 'blow-me.mp3',                title: 'Blow Me',                dur: 131 },
+    { file: 'just-kitten.mp3',            title: 'Just Kitten',            dur: 199 },
+    { file: 'ym.mp3',                     title: 'Ym',                     dur: 132 },
   ];
 
   const audio = $('#audio');
@@ -383,7 +383,7 @@
     day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
   }).format(new Date(iso));
 
-  fetch('assets/posts/posts.json', { cache: 'no-store' })
+  fetch('posts.json', { cache: 'no-store' })
     .then((r) => (r.ok ? r.json() : null))
     .then((d) => {
       const posts = (d && d.posts) || [];
