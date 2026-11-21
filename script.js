@@ -414,12 +414,12 @@
     art.classList.add('is-global');      // прячет «комментировать в тг»
     const id = art.dataset.id;
     const slot = $('.pc-slot', art);
-    if (slot) slot.innerHTML = `
+    if (slot) slot.innerHTML = chatUser ? `
       <form class="pc-form">
-        <input name="by" placeholder="имя" maxlength="24" autocomplete="off">
         <input name="text" placeholder="комментарий…" maxlength="500" autocomplete="off" required>
         <button type="submit" class="pc-send">отправить</button>
-      </form>`;
+      </form>` : `
+      <button class="pc-login mono" type="button">войти через тг, чтобы комментировать</button>`;
     // лайки: живой счётчик
     fbUnsubs.push(fb.db.doc(`posts/${id}`).onSnapshot(
       (s) => { const el = $('.like-n', art); if (el) el.textContent = (s.exists ? s.data().likes || 0 : 0); },
@@ -434,7 +434,8 @@
         live.hidden = false;
         live.innerHTML = snap.docs.map((dc) => {
           const c = dc.data();
-          return `<div class="pc"><b>${esc(c.by || 'аноним')}</b><span>${linkify(c.text)}</span></div>`;
+          const admin = (c.username || '').toLowerCase() === 'aayogima';
+          return `<div class="pc"><b>${esc(c.by || 'аноним')}</b>${admin ? '<span class="msg-admin">админ</span>' : ''}<span>${linkify(c.text)}</span></div>`;
         }).join('');
       },
       () => {},
@@ -515,19 +516,24 @@
     }
   });
 
-  // отправка комментария (глобальный режим)
+  // вход для комментирования: открывает чат, где кнопка входа
+  feed.addEventListener('click', (e) => {
+    if (e.target.closest('.pc-login')) openChat();
+  });
+
+  // отправка комментария (только после входа через тг)
   feed.addEventListener('submit', (e) => {
     const form = e.target.closest('.pc-form');
-    if (!form || !fb) return;
+    if (!form || !fb || !chatUser) return;
     e.preventDefault();
     const art = form.closest('.post');
-    const by = (form.by.value || '').trim().slice(0, 24) || 'аноним';
+    const by = chatUser.name.slice(0, 60);
     const text = (form.text.value || '').trim().slice(0, 500);
     if (!text) return;
     const sendBtn = $('.pc-send', form);
     sendBtn.textContent = '…';
     fb.db.collection(`posts/${art.dataset.id}/comments`).add({
-      by, text, date: new Date().toISOString(),
+      by, username: chatUser.username || '', uid: chatUser.uid, text, date: new Date().toISOString(),
     })
       .then(() => { form.text.value = ''; sendBtn.textContent = '✓'; setTimeout(() => sendBtn.textContent = 'отправить', 1200); })
       .catch(() => { sendBtn.textContent = '×'; setTimeout(() => sendBtn.textContent = 'отправить', 1500); toast('комментарий не ушёл — попробуй ещё'); });
@@ -572,6 +578,7 @@
     chatUser = { uid: user.id, name: user.first_name || user.username || 'анон', username: user.username || '', photo: user.photo_url || '' };
     try { localStorage.setItem('tguser', JSON.stringify(chatUser)); } catch {}
     syncChatLogin();
+    postsSig = ''; loadPosts();   // перерисовать посты: появились формы комментариев
     toast(`привет, ${chatUser.name} 👋`);
   };
 
@@ -585,6 +592,7 @@
         chatUser = null;
         try { localStorage.removeItem('tguser'); } catch {}
         syncChatLogin();
+        postsSig = ''; loadPosts();   // убрать формы комментариев
       });
     } else {
       chatForm.hidden = true;

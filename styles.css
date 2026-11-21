@@ -533,9 +533,10 @@ h1, h2, h3 { line-height: 1.12; font-weight: 800; }
   display: flex; flex-direction: column; gap: 8px;
   border-top: 1px solid var(--hairline-soft); padding-top: 10px;
 }
-.pc { display: flex; flex-direction: column; gap: 1px; }
+.pc { display: block; }
 .pc b { font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--red); font-weight: 500; }
-.pc span { font-size: 13.5px; color: var(--text); overflow-wrap: anywhere; }
+.pc .msg-admin { display: inline-block; vertical-align: 1px; margin-left: 6px; }
+.pc > span { display: block; margin-top: 2px; font-size: 13.5px; color: var(--text); overflow-wrap: anywhere; }
 .post.is-global .post-tg { display: none; }
 
 /* форма комментария (глобальный режим) */
@@ -548,8 +549,14 @@ h1, h2, h3 { line-height: 1.12; font-weight: 800; }
 }
 .pc-form input::placeholder { color: var(--text-faint); }
 .pc-form input:focus { outline: none; border-color: rgba(255, 65, 72, .55); }
-.pc-form input[name="by"] { flex: 0 0 90px; }
 .pc-form input[name="text"] { flex: 1; }
+.pc-login {
+  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text-faint); border-bottom: 1px dashed var(--hairline); padding-bottom: 2px;
+  align-self: flex-start; cursor: pointer;
+  transition: color .25s, border-color .25s;
+}
+.pc-login:hover { color: var(--red); border-color: var(--red); }
 .pc-send {
   font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
   color: var(--red); background: none; border: 1px solid rgba(255, 65, 72, .45);
