@@ -344,6 +344,13 @@ h1, h2, h3 { line-height: 1.12; font-weight: 800; }
   color: var(--text); border-radius: 999px; padding: 4px 12px;
   display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
 }
+.ava-tag {
+  position: absolute; top: -13px; left: 50%; transform: translateX(-50%); z-index: 2;
+  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .14em;
+  background: var(--surface-c-highest); color: var(--red);
+  border: 1px solid rgba(255, 65, 72, .45); border-radius: 999px;
+  padding: 4px 12px; white-space: nowrap;
+}
 
 /* ---------- выбор формы ---------- */
 .shape-picker { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
@@ -497,6 +504,38 @@ h1, h2, h3 { line-height: 1.12; font-weight: 800; }
   width: 100%; height: auto; border-radius: var(--r-s);
   cursor: zoom-in; border: 1px solid var(--hairline-soft);
 }
+
+/* ---------- лайки и комментарии ---------- */
+.post-foot {
+  display: flex; align-items: center; gap: 8px;
+  border-top: 1px solid var(--hairline-soft); padding-top: 10px; margin-top: auto;
+}
+.post-like {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em;
+  color: var(--text-dim); border: 1px solid var(--hairline);
+  border-radius: 999px; padding: 5px 12px;
+  transition: transform .25s var(--spring), color .25s, border-color .25s;
+}
+.post-like:hover { transform: translateY(-2px); color: var(--red); border-color: rgba(255, 65, 72, .5); }
+.post-like.is-liked { color: var(--red); border-color: rgba(255, 65, 72, .55); }
+.post-like.is-liked .like-heart { animation: heartPop .45s var(--spring); }
+@keyframes heartPop { 40% { transform: scale(1.5); } }
+.like-heart { display: inline-block; }
+.post-tg {
+  margin-left: auto; font-family: var(--font-mono); font-size: 10.5px;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--text-faint);
+  border-bottom: 1px dashed var(--hairline); padding-bottom: 2px;
+  transition: color .25s, border-color .25s;
+}
+.post-tg:hover { color: var(--red); border-color: var(--red); }
+.post-comments {
+  display: flex; flex-direction: column; gap: 8px;
+  border-top: 1px solid var(--hairline-soft); padding-top: 10px;
+}
+.pc { display: flex; flex-direction: column; gap: 1px; }
+.pc b { font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--red); font-weight: 500; }
+.pc span { font-size: 13.5px; color: var(--text); overflow-wrap: anywhere; }
 
 /* лайтбокс для картинок постов */
 .lightbox {

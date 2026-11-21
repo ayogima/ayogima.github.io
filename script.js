@@ -383,16 +383,24 @@
     day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
   }).format(new Date(iso));
 
-  fetch('posts.json', { cache: 'no-store' })
+  // загрузка постов + живое обновление: раз в 15с сверяем posts.json
+  let postsSig = '';
+  const loadPosts = () => fetch(`posts.json?t=${Date.now()}`, { cache: 'no-store' })
     .then((r) => (r.ok ? r.json() : null))
     .then((d) => {
       const posts = (d && d.posts) || [];
       if (!posts.length) return;
+      const sig = JSON.stringify(posts);
+      if (sig === postsSig) return;   // ничего не изменилось
+      postsSig = sig;
       posts.sort((a, b) => ((b.pinned ? 1 : 0) - (a.pinned ? 1 : 0)) || (new Date(b.date) - new Date(a.date)));
+      feed.innerHTML = '';
       for (const p of posts) {
         const art = document.createElement('article');
         art.className = 'post';
         const num = String(p.id || '').replace(/\D/g, '');
+        const liked = (() => { try { return !!localStorage.getItem('liked:' + p.id); } catch { return false; } })();
+        const likeN = (p.likes || 0) + (liked ? 1 : 0);
         art.innerHTML = `
           <header class="post-meta mono">
             <span class="post-id">#${pad2(num)}</span>
@@ -400,12 +408,40 @@
             ${p.pinned ? '<span class="post-pin"><i class="rec-dot rec-dot--sm" aria-hidden="true"></i>вверху</span>' : ''}
           </header>
           ${p.text ? `<div class="post-text">${linkify(p.text)}</div>` : ''}
-          ${p.image ? `<img class="post-img" src="${esc(p.image)}" alt="${esc((p.text || 'пост').slice(0, 80))}" loading="lazy">` : ''}`;
+          ${p.image ? `<img class="post-img" src="${esc(p.image)}?v=${Date.now()}" alt="${esc((p.text || 'пост').slice(0, 80))}" loading="lazy">` : ''}
+          ${(p.comments && p.comments.length) ? `<div class="post-comments">${
+            p.comments.map((c) => `<div class="pc"><b>${esc(c.by || 'аноним')}</b><span>${linkify(c.text)}</span></div>`).join('')
+          }</div>` : ''}
+          <div class="post-foot">
+            <button class="post-like${liked ? ' is-liked' : ''}" data-id="${esc(p.id)}" aria-label="Лайк посту ${esc(p.id)}">
+              <span class="like-heart" aria-hidden="true">♥</span><span class="like-n">${likeN}</span>
+            </button>
+            <a class="post-tg" href="https://t.me/aayogima?free=zUEtBAujyA53A8gD" target="_blank" rel="noopener">комментировать в тг</a>
+          </div>`;
         feed.appendChild(art);
       }
       postsSection.hidden = false;
     })
     .catch(() => {});
+  loadPosts();
+  setInterval(loadPosts, 15000);
+
+  // лайки: свой — в localStorage, общий счётчик — из posts.json
+  feed.addEventListener('click', (e) => {
+    const btn = e.target.closest('.post-like');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    let liked;
+    try { liked = !!localStorage.getItem('liked:' + id); } catch { liked = false; }
+    const nEl = $('.like-n', btn);
+    const n = parseInt(nEl.textContent, 10) || 0;
+    try {
+      if (liked) localStorage.removeItem('liked:' + id);
+      else localStorage.setItem('liked:' + id, '1');
+    } catch {}
+    btn.classList.toggle('is-liked', !liked);
+    nEl.textContent = n + (liked ? -1 : 1);
+  });
 
   // лайтбокс: клик по картинке — фуллскрин, клик/Esc — закрыть
   const lb = $('#lightbox');
