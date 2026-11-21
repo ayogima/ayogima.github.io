@@ -58,6 +58,31 @@ def git_push(msg):
         print('  ! push не вышел:', err[-1] if err else '?')
 
 
+def setup_firebase(raw):
+    """принимает конфиг из консоли firebase (JS-объект или JSON) и пишет firebase-config.js"""
+    import re
+    m = re.search(r'\{.*\}', raw, re.S)
+    if not m:
+        return print('не понял конфиг — вставь целиком кусок вида const firebaseConfig = { ... }')
+    s = m.group(0)
+    s = re.sub(r'([{,]\s*)(\w+)\s*:', r'\1"\2":', s)      # ключи без кавычек → с кавычками
+    s = re.sub(r',\s*}', '}', s)                           # висячая запятая
+    try:
+        cfg = json.loads(s)
+    except Exception as e:
+        return print(f'конфиг не распарсился ({e}) — вставь его целиком, как дал firebase')
+    need = {'apiKey', 'authDomain', 'projectId', 'appId'}
+    if not need.issubset(cfg):
+        return print(f'в конфиге не хватает: {need - set(cfg)}')
+    js = ('// firebase-конфиг сайта (публичный, это не секрет)\n'
+          '// с ним лайки и комментарии видны всем в реальном времени\n'
+          'window.FB_CONFIG = ' + json.dumps(cfg, ensure_ascii=False, indent=2) + ';\n')
+    (BASE / 'firebase-config.js').write_text(js, encoding='utf-8')
+    print('firebase-config.js записан')
+    git_push('firebase: глобальные лайки и комментарии включены')
+    print('готово! обнови страницу сайта — под постами появятся формы комментариев')
+
+
 def setup_repo(url):
     url = url.strip().rstrip('/')
     if url.startswith('https://github.com/'):
@@ -186,9 +211,14 @@ def main():
     ap.add_argument('--comment', metavar='ID', help='комментарий к посту: --comment p2 "текст"')
     ap.add_argument('--by', help='имя автора комментария (с --comment)')
     ap.add_argument('--setup', metavar='REPO', help='подключить github-репозиторий (один раз)')
+    ap.add_argument('--firebase', metavar='CONFIG', help='вставить конфиг firebase (глобальные лайки/комменты)')
     args = ap.parse_args()
 
     d = load()
+
+    # глобальные лайки/комментарии через firebase
+    if args.firebase:
+        return setup_firebase(args.firebase)
 
     # подключение github
     if args.setup:

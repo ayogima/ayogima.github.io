@@ -536,6 +536,28 @@ h1, h2, h3 { line-height: 1.12; font-weight: 800; }
 .pc { display: flex; flex-direction: column; gap: 1px; }
 .pc b { font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--red); font-weight: 500; }
 .pc span { font-size: 13.5px; color: var(--text); overflow-wrap: anywhere; }
+.post.is-global .post-tg { display: none; }
+
+/* форма комментария (глобальный режим) */
+.pc-form { display: flex; gap: 7px; }
+.pc-form input {
+  font-family: var(--font-body); font-size: 13px; color: var(--text);
+  background: var(--surface-c-hi); border: 1px solid var(--hairline);
+  border-radius: 999px; padding: 8px 14px; min-width: 0;
+  transition: border-color .25s;
+}
+.pc-form input::placeholder { color: var(--text-faint); }
+.pc-form input:focus { outline: none; border-color: rgba(255, 65, 72, .55); }
+.pc-form input[name="by"] { flex: 0 0 90px; }
+.pc-form input[name="text"] { flex: 1; }
+.pc-send {
+  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--red); background: none; border: 1px solid rgba(255, 65, 72, .45);
+  border-radius: 999px; padding: 0 14px; cursor: pointer; white-space: nowrap;
+  transition: background .25s, color .25s, transform .25s var(--spring);
+}
+.pc-send:hover { background: var(--red); color: #fff; transform: translateY(-1px); }
+:root[data-theme="light"] .pc-send:hover { color: #fff; }
 
 /* лайтбокс для картинок постов */
 .lightbox {

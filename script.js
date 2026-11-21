@@ -371,7 +371,9 @@
   });
 
   /* ============================================================
-     8 · ПОСТЫ · assets/posts/posts.json (постит — post.py)
+     8 · ПОСТЫ · posts.json (постит — post.py)
+     + глобальный режим: если есть firebase-config.js —
+       лайки и комментарии живут в Firebase и видны всем live
      ============================================================ */
   const postsSection = $('#posts');
   const feed = $('#feed');
@@ -383,6 +385,62 @@
     day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
   }).format(new Date(iso));
 
+  /* ---------- Firebase (глобальные лайки/комментарии) ---------- */
+  const loadScript = (src) => new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+  let fb = null;                 // { db } — если null, работаем локально
+  let fbUnsubs = [];             // отписки live-слушателей
+  const fbReady = loadScript('firebase-config.js')
+    .then(() => {
+      if (!window.FB_CONFIG) return null;
+      return Promise.all([
+        loadScript('https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js'),
+        loadScript('https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js'),
+      ]).then(() => {
+        firebase.initializeApp(window.FB_CONFIG);
+        fb = { db: firebase.firestore() };
+        // лента уже могла отрисоваться — навешиваем live сейчас
+        $$('.post', feed).forEach(attachLive);
+      });
+    })
+    .catch(() => {});            // нет конфига → локальный режим
+
+  function attachLive(art) {
+    if (!fb || !art || art.dataset.live === '1') return;
+    art.dataset.live = '1';
+    art.classList.add('is-global');      // прячет «комментировать в тг»
+    const id = art.dataset.id;
+    const slot = $('.pc-slot', art);
+    if (slot) slot.innerHTML = `
+      <form class="pc-form">
+        <input name="by" placeholder="имя" maxlength="24" autocomplete="off">
+        <input name="text" placeholder="комментарий…" maxlength="500" autocomplete="off" required>
+        <button type="submit" class="pc-send">отправить</button>
+      </form>`;
+    // лайки: живой счётчик
+    fbUnsubs.push(fb.db.doc(`posts/${id}`).onSnapshot(
+      (s) => { const el = $('.like-n', art); if (el) el.textContent = (s.exists ? s.data().likes || 0 : 0); },
+      () => {},
+    ));
+    // комментарии: живой список
+    const live = $('.pc-live', art);
+    fbUnsubs.push(fb.db.collection(`posts/${id}/comments`).orderBy('date').onSnapshot(
+      (snap) => {
+        if (!live) return;
+        if (snap.empty) { live.hidden = true; return; }
+        live.hidden = false;
+        live.innerHTML = snap.docs.map((dc) => {
+          const c = dc.data();
+          return `<div class="pc"><b>${esc(c.by || 'аноним')}</b><span>${linkify(c.text)}</span></div>`;
+        }).join('');
+      },
+      () => {},
+    ));
+  }
+
   // загрузка постов + живое обновление: раз в 15с сверяем posts.json
   let postsSig = '';
   const loadPosts = () => fetch(`posts.json?t=${Date.now()}`, { cache: 'no-store' })
@@ -393,14 +451,17 @@
       const sig = JSON.stringify(posts);
       if (sig === postsSig) return;   // ничего не изменилось
       postsSig = sig;
+      fbUnsubs.forEach((u) => { try { u(); } catch {} });   // старые слушатели долой
+      fbUnsubs = [];
       posts.sort((a, b) => ((b.pinned ? 1 : 0) - (a.pinned ? 1 : 0)) || (new Date(b.date) - new Date(a.date)));
       feed.innerHTML = '';
       for (const p of posts) {
         const art = document.createElement('article');
         art.className = 'post';
+        art.dataset.id = esc(p.id);
         const num = String(p.id || '').replace(/\D/g, '');
         const liked = (() => { try { return !!localStorage.getItem('liked:' + p.id); } catch { return false; } })();
-        const likeN = (p.likes || 0) + (liked ? 1 : 0);
+        const likeN = (p.likes || 0) + (liked && !fb ? 1 : 0);
         art.innerHTML = `
           <header class="post-meta mono">
             <span class="post-id">#${pad2(num)}</span>
@@ -408,17 +469,20 @@
             ${p.pinned ? '<span class="post-pin"><i class="rec-dot rec-dot--sm" aria-hidden="true"></i>вверху</span>' : ''}
           </header>
           ${p.text ? `<div class="post-text">${linkify(p.text)}</div>` : ''}
-          ${p.image ? `<img class="post-img" src="${esc(p.image)}?v=${Date.now()}" alt="${esc((p.text || 'пост').slice(0, 80))}" loading="lazy">` : ''}
+          ${p.image ? `<img class="post-img" src="${esc(p.image)}?v=${postsSig.length}${Date.now() % 97}" alt="${esc((p.text || 'пост').slice(0, 80))}" loading="lazy">` : ''}
           ${(p.comments && p.comments.length) ? `<div class="post-comments">${
             p.comments.map((c) => `<div class="pc"><b>${esc(c.by || 'аноним')}</b><span>${linkify(c.text)}</span></div>`).join('')
           }</div>` : ''}
+          <div class="pc-live" hidden></div>
           <div class="post-foot">
             <button class="post-like${liked ? ' is-liked' : ''}" data-id="${esc(p.id)}" aria-label="Лайк посту ${esc(p.id)}">
               <span class="like-heart" aria-hidden="true">♥</span><span class="like-n">${likeN}</span>
             </button>
             <a class="post-tg" href="https://t.me/aayogima?free=zUEtBAujyA53A8gD" target="_blank" rel="noopener">комментировать в тг</a>
-          </div>`;
+          </div>
+          <div class="pc-slot"></div>`;
         feed.appendChild(art);
+        attachLive(art);
       }
       postsSection.hidden = false;
     })
@@ -426,21 +490,47 @@
   loadPosts();
   setInterval(loadPosts, 15000);
 
-  // лайки: свой — в localStorage, общий счётчик — из posts.json
+  // лайки: с базой — глобально (видно всем), без — локально
   feed.addEventListener('click', (e) => {
     const btn = e.target.closest('.post-like');
     if (!btn) return;
     const id = btn.dataset.id;
     let liked;
     try { liked = !!localStorage.getItem('liked:' + id); } catch { liked = false; }
-    const nEl = $('.like-n', btn);
-    const n = parseInt(nEl.textContent, 10) || 0;
     try {
       if (liked) localStorage.removeItem('liked:' + id);
       else localStorage.setItem('liked:' + id, '1');
     } catch {}
     btn.classList.toggle('is-liked', !liked);
-    nEl.textContent = n + (liked ? -1 : 1);
+    if (fb) {
+      const doc = fb.db.doc(`posts/${id}`);
+      fb.db.runTransaction((t) => t.get(doc).then((s) => {
+        const cur = s.exists ? s.data().likes || 0 : 0;
+        t.set(doc, { likes: Math.max(0, cur + (liked ? -1 : 1)) }, { merge: true });
+      })).catch(() => toast('не отправилось — попробуй ещё'));
+    } else {
+      const nEl = $('.like-n', btn);
+      const n = parseInt(nEl.textContent, 10) || 0;
+      nEl.textContent = n + (liked ? -1 : 1);
+    }
+  });
+
+  // отправка комментария (глобальный режим)
+  feed.addEventListener('submit', (e) => {
+    const form = e.target.closest('.pc-form');
+    if (!form || !fb) return;
+    e.preventDefault();
+    const art = form.closest('.post');
+    const by = (form.by.value || '').trim().slice(0, 24) || 'аноним';
+    const text = (form.text.value || '').trim().slice(0, 500);
+    if (!text) return;
+    const sendBtn = $('.pc-send', form);
+    sendBtn.textContent = '…';
+    fb.db.collection(`posts/${art.dataset.id}/comments`).add({
+      by, text, date: new Date().toISOString(),
+    })
+      .then(() => { form.text.value = ''; sendBtn.textContent = '✓'; setTimeout(() => sendBtn.textContent = 'отправить', 1200); })
+      .catch(() => { sendBtn.textContent = '×'; setTimeout(() => sendBtn.textContent = 'отправить', 1500); toast('комментарий не ушёл — попробуй ещё'); });
   });
 
   // лайтбокс: клик по картинке — фуллскрин, клик/Esc — закрыть
