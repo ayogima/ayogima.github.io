@@ -521,11 +521,35 @@
     if (e.target.closest('.pc-login')) openChat();
   });
 
+  /* ---------- анти-спам: 5 сек между отправками (админ/⭐vip — без него) ---------- */
+  let cdUntil = 0;
+  let cdTimer = null;
+  let vipNames = new Set();
+  const isVip = () => {
+    const u = ((chatUser && chatUser.username) || '').toLowerCase();
+    return isAdmin(chatUser || {}) || vipNames.has(u);
+  };
+  const cdLeft = () => (isVip() ? 0 : Math.max(0, Math.ceil((cdUntil - Date.now()) / 1000)));
+  const cdBlockToast = () => toast('анти-спам: подожди ' + cdLeft() + ' сек · убрать таймер — 15 ⭐ в подарок @aayogima');
+  const cdStart = (btn) => {
+    cdUntil = Date.now() + 5000;
+    if (!btn) return;
+    const orig = 'отправить';
+    const tick = () => {
+      const left = cdLeft();
+      if (left <= 0 || isVip()) { clearInterval(cdTimer); cdTimer = null; btn.textContent = orig; btn.disabled = false; return; }
+      btn.textContent = left + ' сек'; btn.disabled = true;
+    };
+    if (cdTimer) clearInterval(cdTimer);
+    tick(); cdTimer = setInterval(tick, 1000);
+  };
+
   // отправка комментария (только после входа через тг)
   feed.addEventListener('submit', (e) => {
     const form = e.target.closest('.pc-form');
     if (!form || !fb || !chatUser) return;
     e.preventDefault();
+    if (cdLeft() > 0) return cdBlockToast();
     const art = form.closest('.post');
     const by = chatUser.name.slice(0, 60);
     const text = (form.text.value || '').trim().slice(0, 500);
@@ -535,7 +559,7 @@
     fb.db.collection(`posts/${art.dataset.id}/comments`).add({
       by, username: chatUser.username || '', uid: chatUser.uid, text, date: new Date().toISOString(),
     })
-      .then(() => { form.text.value = ''; sendBtn.textContent = '✓'; setTimeout(() => sendBtn.textContent = 'отправить', 1200); })
+      .then(() => { form.text.value = ''; sendBtn.textContent = '✓'; setTimeout(() => sendBtn.textContent = 'отправить', 1200); cdStart(sendBtn); })
       .catch(() => { sendBtn.textContent = '×'; setTimeout(() => sendBtn.textContent = 'отправить', 1500); toast('комментарий не ушёл — попробуй ещё'); });
   });
 
@@ -661,9 +685,13 @@
     s.setAttribute('data-request-access', 'write');
     $('#tgWidget').appendChild(s);
 
-    // живые сообщения
+    // живые сообщения + белый список vip (кому снят таймер)
     fbReady.then(() => {
       if (!fb) return;
+      fb.db.collection('vip').onSnapshot(
+        (s) => { vipNames = new Set(s.docs.map((d) => d.id.toLowerCase())); const g = $('#chatGift'); if (g) g.hidden = isVip(); },
+        () => {},
+      );
       fb.db.collection('chat').orderBy('date').limitToLast(120).onSnapshot(
         (snap) => renderChat(snap.docs),
         () => {},
@@ -678,13 +706,14 @@
     const input = $('#chatText');
     const text = (input.value || '').trim().slice(0, 500);
     if (!text || !fb || !chatUser) return;
+    if (cdLeft() > 0) return cdBlockToast();
     const btn = $('.pc-send', chatForm);
     btn.textContent = '…';
     fb.db.collection('chat').add({
       uid: chatUser.uid, name: chatUser.name, username: chatUser.username,
       photo: chatUser.photo, text, date: new Date().toISOString(),
     })
-      .then(() => { input.value = ''; input.focus(); btn.textContent = '✓'; setTimeout(() => btn.textContent = 'отправить', 1000); try { localStorage.setItem('chatSeen', Date.now()); } catch {} })
+      .then(() => { input.value = ''; input.focus(); btn.textContent = '✓'; setTimeout(() => btn.textContent = 'отправить', 1000); try { localStorage.setItem('chatSeen', Date.now()); } catch {} cdStart(btn); })
       .catch(() => { btn.textContent = '×'; setTimeout(() => btn.textContent = 'отправить', 1500); toast('сообщение не ушло — попробуй ещё'); });
   });
 })();
