@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#050505" id="metaTheme">
-<meta name="description" content="маршмело⁴² — @aayogima. Nothing × Material 3 Expressive: чёрно-белый, один экран, dot-matrix, glyph, светлая/тёмная тема и QR для бесплатного сообщения в ЛС.">
-<title>маршмело⁴² · @aayogima · nothing × m3</title>
+<meta name="theme-color" content="#f1ead9" id="metaTheme">
+<meta name="description" content="маршмело⁴² — @aayogima. Личное пространство: музыка, записи, разговоры и право на анонимность.">
+<title>маршмело⁴² — личное пространство</title>
 <link rel="icon" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;700;900&family=JetBrains+Mono:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -22,10 +22,10 @@
   <header class="top">
     <div class="top-left">
       <span class="rec-dot" aria-hidden="true"></span>
-      <span class="dotmark">aayogima</span>
-      <span class="top-tag mono">n42</span>
+      <span class="dotmark">м.</span>
+      <span class="top-tag mono">личное пространство / 42</span>
     </div>
-    <p class="top-mid mono">nothing <em>×</em> material 3 expressive <em>·</em> black &amp; white</p>
+    <p class="top-mid mono">музыка <em>·</em> записи <em>·</em> разговоры</p>
     <div class="top-right mono">
       <button class="theme-btn ripple" id="themeBtn" aria-label="Переключить тему" title="тема · инверсия">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/></svg>
@@ -39,150 +39,163 @@
   <!-- ================= BOARD · 3 колонки, один экран ================= -->
   <main class="board">
 
-    <!-- ========== LEFT · 01 профиль / 02 цифры / 03 саундтрек ========== -->
-    <section class="col col--left">
+    <!-- ============ ОБЛОЖКА ============ -->
+    <section class="cover" aria-label="Профиль">
 
-      <div class="block">
-        <div class="anno mono"><b>01</b><span>профиль</span><i class="anno-line" aria-hidden="true"></i></div>
-        <h1 class="name">маршмело<sup>42</sup></h1>
-        <p class="name-sub mono">// telegram · dark ui · кот в аве</p>
+      <span class="deco deco--cookie shape shape--cookie" aria-hidden="true"></span>
+      <span class="deco deco--burst shape shape--burst" aria-hidden="true"></span>
+      <span class="deco deco--pill shape shape--pill" aria-hidden="true"></span>
 
+      <div class="cover-left">
+        <p class="overline mono">личное пространство · выпуск 42</p>
+        <h1 class="name">марш<br>мело<sup>42</sup></h1>
+        <p class="name-sub mono">@aayogima · кот в аве, музыка в ушах</p>
+
+        <div class="actions">
+          <a class="btn btn--filled ripple" href="https://t.me/aayogima?free=zUEtBAujyA53A8gD" target="_blank" rel="noopener">
+            Написать в Telegram
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+          </a>
+          <button class="btn btn--tonal ripple" data-copy="@aayogima">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+            скопировать @
+          </button>
+        </div>
+      </div>
+
+      <div class="cover-right">
+        <div class="avatar-wrap">
+          <span class="ava-tag mono">#freemissed</span>
+          <div class="glyph-ring" id="glyphRing" aria-hidden="true"></div>
+          <div class="morph-glow" aria-hidden="true"></div>
+          <div class="morph" id="morph" style="clip-path: polygon(50% 10%, 60% 12%, 70% 18%, 78% 26%, 86% 36%, 92% 48%, 90% 60%, 86% 72%, 78% 82%, 68% 90%, 56% 92%, 44% 90%, 32% 84%, 22% 76%, 14% 66%, 10% 54%, 12% 42%, 18% 30%, 28% 20%, 38% 12%)">
+            <img src="avatar.jpg" alt="Аватар: серый кот на фоне голубого неба и камней" width="640" height="640">
+          </div>
+          <span class="badge mono"><i class="online-dot" aria-hidden="true"></i>online</span>
+        </div>
+
+        <div class="shape-picker" role="group" aria-label="Выбор формы Material">
+          <button class="pick ripple" data-shape="circle" aria-label="Круг"><span class="shape shape--circle"></span></button>
+          <button class="pick ripple" data-shape="squircle" aria-label="Скруглённый квадрат"><span class="shape shape--squircle"></span></button>
+          <button class="pick ripple" data-shape="pill" aria-label="Пилюля"><span class="shape shape--pill"></span></button>
+          <button class="pick ripple" data-shape="arch" aria-label="Арка"><span class="shape shape--arch"></span></button>
+          <button class="pick ripple is-active" data-shape="cookie" aria-label="Печенье"><span class="shape shape--cookie"></span></button>
+          <button class="pick ripple" data-shape="clover" aria-label="Клевер"><span class="shape shape--clover"></span></button>
+          <button class="pick ripple" data-shape="burst" aria-label="Вспышка"><span class="shape shape--burst"></span></button>
+          <button class="pick ripple" data-shape="diamond" aria-label="Ромб"><span class="shape shape--diamond"></span></button>
+        </div>
+        <p class="shape-name mono">форма: <b id="shapeName">cookie</b></p>
+
+        <p class="handle">@aayogima</p>
+      </div>
+    </section>
+
+    <!-- ============ 01 · МАНИФЕСТ ============ -->
+    <section class="sheet" id="manifest">
+      <header class="sheet-head">
+        <p class="overline mono">01 — манифест</p>
+        <span class="sheet-no" aria-hidden="true">01</span>
+      </header>
+      <div class="manifest-grid">
         <figure class="quote">
           <span class="shape shape--clover q-shape" aria-hidden="true"></span>
           <blockquote>Каждый имеет право на анонимность. Тот, кто её нарушает, — враг интернета.</blockquote>
           <figcaption class="mono">— из био</figcaption>
         </figure>
-
         <div class="tags">
           <span class="tag">анонимность</span>
           <span class="tag">музыка</span>
-          <span class="tag">тёмные темы</span>
+          <span class="tag">бумага и чернила</span>
           <span class="tag">коты</span>
-          <span class="tag">material</span>
+          <span class="tag">формы</span>
           <span class="tag">42</span>
         </div>
-      </div>
-
-      <div class="block">
-        <div class="anno mono"><b>02</b><span>цифры</span><i class="anno-line" aria-hidden="true"></i></div>
         <div class="stats">
           <div class="stat"><b class="dot-num">42</b><span class="mono">талисман</span></div>
           <div class="stat"><b class="dot-num">06</b><span class="mono">треков</span></div>
           <div class="stat"><b class="dot-num">00</b><span class="mono">звёзд</span></div>
         </div>
       </div>
-
-      <div class="block block--grow">
-        <div class="anno mono"><b>03</b><span>саундтрек</span><i class="anno-line" aria-hidden="true"></i></div>
-
-        <div class="player">
-          <div class="pl-head">
-            <span class="pl-label mono">now playing</span>
-            <span class="eq" id="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
-          </div>
-          <p class="pl-title" id="plTitle">…</p>
-          <p class="pl-artist mono">fakemink · случайный при каждом заходе</p>
-          <div class="pl-bar" id="plBar" role="slider" aria-label="Позиция трека" tabindex="0">
-            <span class="pl-fill" id="plFill"></span>
-          </div>
-          <div class="pl-time mono"><span id="plCur">0:00</span><span id="plDur">0:00</span></div>
-          <div class="pl-ctrl">
-            <button class="pl-btn ripple" id="plPrev" aria-label="Предыдущий трек">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
-            </button>
-            <button class="pl-btn pl-btn--big ripple" id="plPlay" aria-label="Играть / пауза">
-              <svg viewBox="0 0 24 24" aria-hidden="true" id="plIcon"><path d="M8 5v14l11-7z"/></svg>
-            </button>
-            <button class="pl-btn ripple" id="plNext" aria-label="Следующий трек">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
     </section>
 
-    <!-- ========== CENTER · 00 identity ========== -->
-    <section class="col col--mid" aria-label="Профиль">
-
-      <span class="deco deco--cookie shape shape--cookie" aria-hidden="true"></span>
-      <span class="deco deco--burst shape shape--burst" aria-hidden="true"></span>
-      <span class="deco deco--pill shape shape--pill" aria-hidden="true"></span>
-
-      <div class="avatar-wrap">
-        <span class="ava-tag" aria-label="freemissed">#freemissed</span>
-        <div class="glyph-ring" id="glyphRing" aria-hidden="true"></div>
-        <div class="morph-glow" aria-hidden="true"></div>
-        <div class="morph" id="morph" style="clip-path: polygon(50% 10%, 60% 12%, 70% 18%, 78% 26%, 86% 36%, 92% 48%, 90% 60%, 86% 72%, 78% 82%, 68% 90%, 56% 92%, 44% 90%, 32% 84%, 22% 76%, 14% 66%, 10% 54%, 12% 42%, 18% 30%, 28% 20%, 38% 12%)">
-          <img src="avatar.jpg" alt="Аватар: серый кот на фоне голубого неба и камней" width="640" height="640">
+    <!-- ============ 02 · МУЗЫКА ============ -->
+    <section class="sheet sheet--ink" id="music">
+      <header class="sheet-head">
+        <p class="overline mono">02 — музыка · fakemink</p>
+        <span class="sheet-no" aria-hidden="true">02</span>
+      </header>
+      <div class="player">
+        <div class="pl-head">
+          <span class="pl-label mono">сейчас играет</span>
+          <span class="eq" id="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
         </div>
-        <span class="badge mono"><i class="online-dot" aria-hidden="true"></i>online</span>
-      </div>
-
-      <div class="shape-picker" role="group" aria-label="Выбор формы Material">
-        <button class="pick ripple" data-shape="circle" aria-label="Круг"><span class="shape shape--circle"></span></button>
-        <button class="pick ripple" data-shape="squircle" aria-label="Скруглённый квадрат"><span class="shape shape--squircle"></span></button>
-        <button class="pick ripple" data-shape="pill" aria-label="Пилюля"><span class="shape shape--pill"></span></button>
-        <button class="pick ripple" data-shape="arch" aria-label="Арка"><span class="shape shape--arch"></span></button>
-        <button class="pick ripple is-active" data-shape="cookie" aria-label="Печенье"><span class="shape shape--cookie"></span></button>
-        <button class="pick ripple" data-shape="clover" aria-label="Клевер"><span class="shape shape--clover"></span></button>
-        <button class="pick ripple" data-shape="burst" aria-label="Вспышка"><span class="shape shape--burst"></span></button>
-        <button class="pick ripple" data-shape="diamond" aria-label="Ромб"><span class="shape shape--diamond"></span></button>
-      </div>
-      <p class="shape-name mono">shape: <b id="shapeName">cookie</b></p>
-
-      <p class="handle dot-font">@aayogima</p>
-
-      <div class="actions">
-        <a class="btn btn--filled ripple" href="https://t.me/aayogima?free=zUEtBAujyA53A8gD" target="_blank" rel="noopener">
-          Написать в Telegram
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
-        </a>
-        <button class="btn btn--tonal ripple" data-copy="@aayogima">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-          копировать @
-        </button>
+        <p class="pl-title" id="plTitle">…</p>
+        <p class="pl-artist mono">fakemink · случайный трек при каждом заходе</p>
+        <div class="pl-bar" id="plBar" role="slider" aria-label="Позиция трека" tabindex="0">
+          <span class="pl-fill" id="plFill"></span>
+        </div>
+        <div class="pl-time mono"><span id="plCur">0:00</span><span id="plDur">0:00</span></div>
+        <div class="pl-ctrl">
+          <button class="pl-btn ripple" id="plPrev" aria-label="Предыдущий трек">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+          </button>
+          <button class="pl-btn pl-btn--big ripple" id="plPlay" aria-label="Играть / пауза">
+            <svg viewBox="0 0 24 24" aria-hidden="true" id="plIcon"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <button class="pl-btn ripple" id="plNext" aria-label="Следующий трек">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+          </button>
+        </div>
       </div>
     </section>
 
-    <!-- ========== RIGHT · 04 контакт / 05 glyph ========== -->
-    <section class="col col--right">
-
-      <div class="block">
-        <div class="anno mono"><b>04</b><span>контакт</span><i class="anno-line" aria-hidden="true"></i></div>
-        <div class="qr-card">
-          <div class="qr-frame">
-            <img src="qr-tg.png" alt="QR-код: написать @aayogima в Telegram бесплатно" width="888" height="888">
-            <span class="qr-scan" aria-hidden="true"></span>
-          </div>
+    <!-- ============ 03 · СВЯЗЬ ============ -->
+    <section class="sheet" id="contact">
+      <header class="sheet-head">
+        <p class="overline mono">03 — связь</p>
+        <span class="sheet-no" aria-hidden="true">03</span>
+      </header>
+      <div class="qr-card">
+        <div class="qr-frame">
+          <img src="qr-tg.png" alt="QR-код: написать @aayogima в Telegram бесплатно" width="888" height="888">
+          <span class="qr-scan" aria-hidden="true"></span>
+        </div>
+        <div class="qr-body">
+          <h3 class="qr-title">написать — бесплатно</h3>
           <p class="qr-note mono">наведи камеру — чат откроется сам</p>
           <div class="qr-actions">
             <a class="btn btn--filled btn--sm ripple" href="https://t.me/aayogima?free=zUEtBAujyA53A8gD" target="_blank" rel="noopener">открыть чат</a>
             <button class="btn btn--tonal btn--sm ripple" data-copy="https://t.me/aayogima?free=zUEtBAujyA53A8gD">ссылка</button>
           </div>
-          <p class="qr-free mono"><i class="rec-dot rec-dot--sm" aria-hidden="true"></i>0 звёзд · бесплатно · всегда</p>
+          <p class="qr-free mono"><i class="rec-dot rec-dot--sm" aria-hidden="true"></i>0 звёзд · без оплаты · всегда</p>
         </div>
       </div>
+    </section>
 
-      <div class="block block--grow">
-        <div class="anno mono"><b>05</b><span>терминал</span><i class="anno-line" aria-hidden="true"></i></div>
-        <div class="term">
-          <div class="term-bar mono">
-            <span class="term-dots" aria-hidden="true"><i></i><i></i><i class="term-dot--red"></i></span>
-            <span class="term-title">aayogima@n42:~</span>
-            <span class="term-live"><i class="rec-dot rec-dot--sm" aria-hidden="true"></i>live</span>
-          </div>
-          <div class="term-body" id="termBody"></div>
+    <!-- ============ 04 · ТЕРМИНАЛ ============ -->
+    <section class="sheet" id="terminal">
+      <header class="sheet-head">
+        <p class="overline mono">04 — терминал</p>
+        <span class="sheet-no" aria-hidden="true">04</span>
+      </header>
+      <div class="term">
+        <div class="term-bar mono">
+          <span class="term-dots" aria-hidden="true"><i></i><i></i><i class="term-dot--red"></i></span>
+          <span class="term-title">aayogima@n42:~</span>
+          <span class="term-live"><i class="rec-dot rec-dot--sm" aria-hidden="true"></i>live</span>
         </div>
+        <div class="term-body" id="termBody"></div>
       </div>
-
     </section>
   </main>
 
   <!-- ================= 06 · ПОСТЫ · лента ================= -->
   <section class="posts" id="posts" hidden>
     <div class="posts-inner">
-      <div class="anno mono"><b>06</b><span>посты</span><i class="anno-line" aria-hidden="true"></i></div>
+      <header class="sheet-head">
+        <p class="overline mono">05 — записи</p>
+        <span class="sheet-no" aria-hidden="true">05</span>
+      </header>
       <div class="feed" id="feed"></div>
     </div>
   </section>
@@ -190,8 +203,8 @@
   <!-- ================= TICKER · dot-matrix бегущая строка ================= -->
   <footer class="ticker" aria-hidden="true">
     <div class="ticker-track" id="ticker">
-      <span>@aayogima · free dm · no stars · nothing × material 3 expressive · black &amp; white · red dot only · 42 · </span>
-      <span>@aayogima · free dm · no stars · nothing × material 3 expressive · black &amp; white · red dot only · 42 · </span>
+      <span>aayogima · записи каждый день · лс без звёзд · музыка fakemink · #freemissed · 42 · </span>
+      <span>aayogima · записи каждый день · лс без звёзд · музыка fakemink · #freemissed · 42 · </span>
     </div>
   </footer>
 

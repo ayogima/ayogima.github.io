@@ -239,7 +239,7 @@
     const info = [
       `<span class="t-hi">aayogima</span><span class="t-red">@n42</span>`,
       `<span class="t-dim">──────────────</span>`,
-      `<span class="t-dim">theme</span> <span class="t-hi">black &amp; white</span>`,
+      `<span class="t-dim">theme</span> <span class="t-hi">бумага · чернила · киноварь</span>`,
       `<span class="t-dim">shell</span> <span class="t-hi">glyph-os 4.2</span>`,
       `<span class="t-dim">music</span> <span class="t-hi">${esc(pl.title.textContent || '…')}</span>`,
       `<span class="t-dim">stars</span> <span class="t-red">0</span><span class="t-dim"> · dm free</span>`,
@@ -356,9 +356,9 @@
   const metaTheme = $('#metaTheme');
   const applyTheme = (t) => {
     root.dataset.theme = t;
-    if (metaTheme) metaTheme.content = t === 'light' ? '#f6f6f6' : '#050505';
+    if (metaTheme) metaTheme.content = t === 'light' ? '#f1ead9' : '#1a150e';
   };
-  let theme = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  let theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   try { theme = localStorage.getItem('theme') || theme; } catch {}
   const hash = location.hash.match(/light|dark/);
   if (hash) theme = hash[0];
